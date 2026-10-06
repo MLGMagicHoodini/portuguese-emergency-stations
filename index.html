@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estações de Emergência · Emergency Stations</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f6f3;--card:#fff;--text:#1d1d1b;--muted:#6b6b66;--line:#e1e1da;--land:#e4eadc;--sea:#dde9f2;--blue:#2f6fd0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#212120;--text:#eeeeea;--muted:#9a9a93;--line:#34342f;--land:#2b3327;--sea:#1b2530;--blue:#6aa2ff}}
+:root[data-theme="dark"]{--bg:#161615;--card:#212120;--text:#eeeeea;--muted:#9a9a93;--line:#34342f;--land:#2b3327;--sea:#1b2530;--blue:#6aa2ff}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:12px 16px 0;max-width:1150px;margin:0 auto}
+h1{font-size:19px;margin:0}header p{margin:2px 0 8px;color:var(--muted);font-size:13px}
+nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+button,select,input{font:inherit;color:var(--text)}
+.b{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
+.b[aria-pressed=true]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.sp{flex:1}
+.app,#page{display:grid;grid-template-columns:minmax(300px,390px) 1fr;gap:14px;padding:12px 16px 20px;max-width:1150px;margin:0 auto}
+#page{display:block}
+.side{display:flex;flex-direction:column;gap:10px;min-width:0}
+input[type=search],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.row{display:flex;gap:6px;flex-wrap:wrap}.row select{flex:1;min-width:120px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.list{display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow:auto}
+.item{display:flex;gap:10px;align-items:center;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 11px;cursor:pointer}
+.item.sel,.item:hover{border-color:var(--text)}.item small{display:block;color:var(--muted)}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.mapwrap{background:var(--sea);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:sticky;top:8px;height:calc(100vh - 120px);min-height:420px}
+svg{width:100%;height:100%;display:block}
+.land{fill:var(--land);stroke:var(--muted);stroke-width:1}
+.inset{fill:var(--sea);stroke:var(--muted);stroke-width:1;stroke-dasharray:3 2}
+.lbl{font-size:10px;fill:var(--muted)}
+.pin{cursor:pointer}.pin circle{stroke:#fff;stroke-width:2}.pin text{font-size:9px;font-weight:700;fill:#fff;text-anchor:middle;pointer-events:none}
+.ring{fill:none;stroke:var(--text);stroke-width:2.5}
+.tag{display:inline-block;font-size:12px;border-radius:999px;padding:2px 9px;margin:0 4px 4px 0;border:1px solid var(--line)}
+.tag.c{color:#fff;border:0}.ok{background:#2e9e6b;color:#fff;border:0}.am{background:#d99a1e;color:#fff;border:0}.rd{background:#d94a38;color:#fff;border:0}
+h2{margin:0 0 4px;font-size:17px}.x{float:right;border:0;background:none;font-size:20px;cursor:pointer;color:var(--muted)}
+dl{margin:8px 0;display:grid;grid-template-columns:auto 1fr;gap:3px 12px}dt{color:var(--muted)}dd{margin:0;word-break:break-word}
+a{color:var(--blue)}.v{border-top:1px solid var(--line);padding:8px 0;font-size:14px}.v small,.note{color:var(--muted);font-size:12px}
+.v img{max-width:100%;border-radius:8px;margin:4px 0}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px;border-bottom:1px solid var(--line)}
+@media (max-width:760px){.app{grid-template-columns:1fr}.mapwrap{position:static;height:55vh;min-height:300px;order:-1}.list{max-height:none}}
+</style></head><body>
+<header><h1 id="h1"></h1><p id="sub"></p><nav id="nav"></nav></header>
+<div class="app" id="app"><div class="side">
+<input type="search" id="q">
+<div class="row"><select id="fd"></select><select id="fv"></select><select id="fs"></select></div>
+<div class="row" id="chips"></div><div id="detail"></div><div class="list" id="list"></div></div>
+<div class="mapwrap"><svg id="map" viewBox="0 0 560 780" preserveAspectRatio="xMidYMid meet"></svg></div></div>
+<div id="page" hidden></div>
+<script>
+var FORM_URL="";            // paste your Google Form link here
+var FORM_STATION_FIELD="";  // optional: e.g. "entry.123456" to pre-fill the station name
+var D={en:{h1:"🚒 Emergency Stations Finder",sub:"Fire, police and ambulance stations in Portugal, with their vehicles. Sample data.",q:"Search name, place, vehicle ID or plate…",map:"Map",stats:"Stats",log:"Changelog",cred:"Credits",sug:"Suggest a change",fire:"Fire",police:"Police",ambulance:"Ambulance",d:"All regions",v:"All vehicle types",s:"All statuses",upd:"Needs update",none:"No stations match.",veh:"Vehicles",nov:"No vehicles recorded yet.",addr:"Address",ph:"Phone",em:"Email",web:"Website",fb:"Facebook",chk:"Last checked",om:"open map",hist:"History",photo:"Photo",noform:"Suggestions are not set up yet: add your form link to FORM_URL in the file.",fresh:"Up to date",age:"Check soon",old:"Needs update",onsite:"Confirmed on site",official:"Official source",social:"Social media",community:"Community",volunteer:"Volunteer",professional:"Professional",h24:"24h staffed",museum:"Museum",service:"In service",reserve:"Reserve",retired:"Retired",vuci:"Urban fire vehicle",amb:"Ambulance",patrol:"Patrol car",id:"ID",type:"Type",model:"Model",plate:"Plate",year:"Year",st:"Stations",vh:"Vehicles",ver:"Verified",ne:"Need update",reg:"Region",tot:"Totals",mc:"Main data comes from visits and public sources. Everything shown now is sample data.",cr:["Map outline: simplified by hand.","Photos belong to their authors and are shown with credit.","Built with help from Claude."],lang:"PT"},
+pt:{h1:"🚒 Localizador de Estações de Emergência",sub:"Quartéis de bombeiros, esquadras de polícia e bases de ambulâncias em Portugal, com os seus veículos. Dados de exemplo.",q:"Pesquisar nome, local, ID ou matrícula…",map:"Mapa",stats:"Estatísticas",log:"Alterações",cred:"Créditos",sug:"Sugerir alteração",fire:"Bombeiros",police:"Polícia",ambulance:"Ambulância",d:"Todas as regiões",v:"Todos os tipos de veículo",s:"Todos os estados",upd:"Precisa de atualização",none:"Nenhuma estação encontrada.",veh:"Veículos",nov:"Ainda sem veículos registados.",addr:"Morada",ph:"Telefone",em:"Email",web:"Sítio web",fb:"Facebook",chk:"Última verificação",om:"abrir mapa",hist:"Historial",photo:"Foto",noform:"As sugestões ainda não estão configuradas: coloque a ligação do formulário em FORM_URL no ficheiro.",fresh:"Atualizado",age:"Verificar em breve",old:"Precisa de atualização",onsite:"Confirmado no local",official:"Fonte oficial",social:"Redes sociais",community:"Comunidade",volunteer:"Voluntários",professional:"Profissionais",h24:"Permanência 24h",museum:"Museu",service:"Em serviço",reserve:"Reserva",retired:"Abatido",vuci:"Veículo urbano de combate a incêndios",amb:"Ambulância",patrol:"Carro-patrulha",id:"ID",type:"Tipo",model:"Modelo",plate:"Matrícula",year:"Ano",st:"Estações",vh:"Veículos",ver:"Verificadas",ne:"Por atualizar",reg:"Região",tot:"Totais",mc:"Os dados vêm de visitas e fontes públicas. Tudo o que se vê agora são dados de exemplo.",cr:["Contorno do mapa: simplificado à mão.","As fotos pertencem aos seus autores e são mostradas com crédito.","Feito com a ajuda do Claude."],lang:"EN"}};
+var TY={fire:{c:"#d94a38",l:"B"},police:{c:"#2f6fd0",l:"P"},ambulance:{c:"#2e9e6b",l:"A"}};
+var S=[
+{id:1,type:"fire",name:"Sample Fire Station Porto",district:"Porto",region:"main",address:"Rua Exemplo 1, Porto",phone:"+351 000 000 001",email:"",website:"https://example.com",facebook:"https://facebook.com",desc:{en:"Sample description. Add the station's history and notes here.",pt:"Descrição de exemplo. Acrescente aqui a história e notas do quartel."},lat:41.15,lon:-8.61,tags:["volunteer","h24"],conf:"onsite",checked:"2026-08-01",vehicles:[{id:"VUCI-01",type:"vuci",model:"Sample model",plate:"00-AA-00",year:2015,status:"service",photo:{credit:"Sample Author",license:"CC BY 4.0"},hist:[{y:2015,t:{en:"Delivered new to this station.",pt:"Entregue novo a este quartel."}},{y:2024,t:{en:"Moved to reserve.",pt:"Passou à reserva."}}]},{id:"VSAT-02",type:"amb",model:"Sample model",plate:"00-BB-00",year:2019,status:"service",hist:[]}]},
+{id:2,type:"police",name:"Sample Police Station Lisboa",district:"Lisboa",region:"main",address:"Avenida Exemplo 20, Lisboa",phone:"+351 000 000 002",email:"",website:"",facebook:"",desc:{en:"Sample description.",pt:"Descrição de exemplo."},lat:38.72,lon:-9.14,tags:["professional"],conf:"social",checked:"2025-06-10",vehicles:[{id:"PT-101",type:"patrol",model:"Sample model",plate:"00-CC-00",year:2020,status:"service",hist:[]}]},
+{id:3,type:"ambulance",name:"Sample Ambulance Base Coimbra",district:"Coimbra",region:"main",address:"Rua Exemplo 5, Coimbra",phone:"",email:"",website:"",facebook:"",desc:{en:"Sample description.",pt:"Descrição de exemplo."},lat:40.21,lon:-8.43,tags:["h24"],conf:"community",checked:"2024-03-02",vehicles:[]},
+{id:4,type:"fire",name:"Sample Fire Station Faro",district:"Faro",region:"main",address:"Rua Exemplo 9, Faro",phone:"",email:"",website:"",facebook:"",desc:{en:"Sample description.",pt:"Descrição de exemplo."},lat:37.02,lon:-7.93,tags:["volunteer","museum"],conf:"official",checked:"2026-09-15",vehicles:[]},
+{id:5,type:"police",name:"Sample Police Station Braga",district:"Braga",region:"main",address:"Praça Exemplo 3, Braga",phone:"",email:"",website:"",facebook:"",desc:{en:"Sample description.",pt:"Descrição de exemplo."},lat:41.55,lon:-8.42,tags:[],conf:"onsite",checked:"2026-01-20",vehicles:[]},
+{id:6,type:"fire",name:"Sample Fire Station Funchal",district:"Madeira",region:"mad",address:"Rua Exemplo 7, Funchal",phone:"",email:"",website:"",facebook:"",desc:{en:"Sample description.",pt:"Descrição de exemplo."},lat:32.65,lon:-16.92,tags:["professional"],conf:"official",checked:"2026-05-05",vehicles:[]},
+{id:7,type:"ambulance",name:"Sample Ambulance Base Ponta Delgada",district:"Açores",region:"az",address:"Rua Exemplo 2, Ponta Delgada",phone:"",email:"",website:"",facebook:"",desc:{en:"Sample description.",pt:"Descrição de exemplo."},lat:37.74,lon:-25.67,tags:["h24"],conf:"community",checked:"2023-11-30",vehicles:[]}];
+var LOG=[["2026-10-06",{en:"Version 2: filters, stats, bilingual interface, Azores and Madeira.",pt:"Versão 2: filtros, estatísticas, interface bilingue, Açores e Madeira."}],["2026-10-06",{en:"First version with map and search.",pt:"Primeira versão com mapa e pesquisa."}]];
+var OUT=[[-8.87,41.87],[-8.65,42.03],[-8.20,42.15],[-7.90,41.98],[-7.45,41.88],[-6.90,41.95],[-6.55,41.88],[-6.20,41.58],[-6.50,41.20],[-6.80,41.05],[-6.95,40.85],[-6.85,40.30],[-7.05,40.05],[-7.00,39.70],[-7.35,39.65],[-7.20,39.30],[-7.50,39.10],[-7.35,38.75],[-7.10,38.20],[-7.30,37.90],[-7.45,37.50],[-7.42,37.17],[-7.90,37.02],[-8.60,37.10],[-8.99,37.02],[-8.80,37.45],[-8.80,37.95],[-8.90,38.45],[-9.22,38.42],[-9.50,38.78],[-9.40,39.35],[-9.07,39.60],[-8.87,40.15],[-8.75,40.65],[-8.70,41.15],[-8.85,41.55]];
+var AZ=[[-31.2,39.45,3,4],[-31.1,39.7,2,2],[-28.7,38.58,4,3],[-28.3,38.47,7,3],[-28,38.65,8,2],[-28,39.05,3,3],[-27.2,38.72,6,3.5],[-25.5,37.78,9,3],[-25.1,36.95,3,3]];
+function P(s){var x=s.lon,y=s.lat;return s.region=="az"?[8+(x+31.5)*21.5,20+(39.9-y)*28]:s.region=="mad"?[10+(x+17.45)*105,185+(32.8-y)*105]:[(x+9.7)*111+160,(42.3-y)*144]}
+var st={lang:/^pt/i.test(navigator.language)?"pt":"en",view:"map",q:"",ty:{fire:1,police:1,ambulance:1},fd:"",fv:"",fs:"",up:0,sel:null,note:""};
+var $=function(i){return document.getElementById(i)};
+function t(k){return D[st.lang][k]||k}
+function e(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function L(o){return o?(o[st.lang]||o.en):""}
+function url(u){return/^https?:\/\//i.test(u)?u:""}
+function lvl(s){var m=(Date.now()-new Date(s.checked))/2.63e9;return m>24?"old":m>12?"age":"fresh"}
+var LC={fresh:"ok",age:"am",old:"rd"};
+function match(s){
+ if(!st.ty[s.type])return 0;if(st.fd&&s.district!=st.fd)return 0;
+ if(st.fv&&!s.vehicles.some(function(v){return v.type==st.fv}))return 0;
+ if(st.fs&&!s.vehicles.some(function(v){return v.status==st.fs}))return 0;
+ if(st.up&&lvl(s)=="fresh")return 0;
+ var q=st.q.trim().toLowerCase();if(!q)return 1;
+ var h=[s.name,s.district,s.address,L(s.desc)];s.vehicles.forEach(function(v){h.push(v.id,v.plate,v.model)});
+ return h.join(" ").toLowerCase().indexOf(q)>-1}
+function opts(el,first,vals,lab,cur){el.innerHTML='<option value="">'+e(first)+'</option>'+vals.map(function(v){return'<option value="'+e(v)+'"'+(v==cur?" selected":"")+'>'+e(lab?lab(v):v)+'</option>'}).join("")}
+function uniq(a){return a.filter(function(x,i){return a.indexOf(x)==i})}
+function nav(){
+ var h="";["map","stats","log","cred"].forEach(function(k){h+='<button class="b" aria-pressed="'+(st.view==k)+'" data-v="'+k+'">'+t(k=="map"?"map":k=="stats"?"stats":k=="log"?"log":"cred")+'</button>'});
+ $("nav").innerHTML=h+'<span class="sp"></span><button class="b" data-sg="1">✉ '+t("sug")+'</button><button class="b" data-lg="1">'+t("lang")+'</button>';
+ $("nav").onclick=function(ev){var b=ev.target.closest("button");if(!b)return;
+  if(b.dataset.v){st.view=b.dataset.v;render()}else if(b.dataset.lg){st.lang=st.lang=="en"?"pt":"en";render()}else sug(null)}}
+function sug(s){
+ if(!FORM_URL){st.note=t("noform");render();return}
+ var u=FORM_URL;if(s&&FORM_STATION_FIELD)u+=(u.indexOf("?")>-1?"&":"?")+"usp=pp_url&"+FORM_STATION_FIELD+"="+encodeURIComponent(s.name);
+ window.open(u,"_blank","noopener")}
+function map(list){
+ var h='<rect width="560" height="780" fill="var(--sea)"/><polygon class="land" points="'+OUT.map(function(p){return((p[0]+9.7)*111+160).toFixed(0)+","+((42.3-p[1])*144).toFixed(0)}).join(" ")+'"/>';
+ h+='<rect class="inset" x="4" y="4" width="152" height="124" rx="8"/><text class="lbl" x="10" y="16">Açores</text>';
+ AZ.forEach(function(a){var p=P({region:"az",lon:a[0],lat:a[1]});h+='<ellipse class="land" cx="'+p[0].toFixed(0)+'" cy="'+p[1].toFixed(0)+'" rx="'+a[2]+'" ry="'+a[3]+'"/>'});
+ h+='<rect class="inset" x="4" y="138" width="152" height="84" rx="8"/><text class="lbl" x="10" y="150">Madeira</text><ellipse class="land" cx="62" cy="190" rx="30" ry="9"/><ellipse class="land" cx="127" cy="156" rx="7" ry="4"/>';
+ list.forEach(function(s){var p=P(s),c=TY[s.type];
+  h+='<g class="pin" tabindex="0" data-id="'+s.id+'" role="button" aria-label="'+e(s.name)+'">'+(st.sel==s.id?'<circle class="ring" cx="'+p[0]+'" cy="'+p[1]+'" r="13"/>':"")+'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="'+c.c+'"/><text x="'+p[0]+'" y="'+(p[1]+3)+'">'+c.l+'</text></g>'});
+ $("map").innerHTML=h;
+ Array.prototype.forEach.call($("map").querySelectorAll(".pin"),function(g){g.onclick=function(){pick(+g.dataset.id)};g.onkeydown=function(ev){if(ev.key=="Enter"||ev.key==" "){ev.preventDefault();pick(+g.dataset.id)}}})}
+function pick(id){st.sel=id;render();$("detail").scrollIntoView({behavior:"smooth",block:"nearest"})}
+function rw(a,b){return b?"<dt>"+a+"</dt><dd>"+b+"</dd>":""}
+function detail(){
+ var s=S.filter(function(x){return x.id==st.sel})[0];
+ if(!s){$("detail").innerHTML=st.note?'<div class="card note">'+e(st.note)+"</div>":"";return}
+ var w=url(s.website),f=url(s.facebook),l=lvl(s);
+ var vs=s.vehicles.length?s.vehicles.map(function(v){return'<div class="v"><strong>'+e(v.id)+"</strong> · "+t(v.type)+' <span class="tag">'+t(v.status)+"</span><br><small>"+e(v.model)+" · "+t("plate")+" "+e(v.plate)+" · "+e(v.year)+"</small>"+
+  (v.photo?(v.photo.url?'<br><img src="'+e(url(v.photo.url))+'" alt="" onerror="this.remove()">':"")+"<br><small>"+t("photo")+": "+e(v.photo.credit)+" ("+e(v.photo.license)+")</small>":"")+
+  (v.hist&&v.hist.length?"<br><small>"+t("hist")+": "+v.hist.map(function(x){return e(x.y)+" "+e(L(x.t))}).join(" → ")+"</small>":"")+"</div>"}).join(""):'<p class="note">'+t("nov")+"</p>";
+ $("detail").innerHTML='<div class="card"><button class="x" aria-label="Close" id="cl">×</button><span class="tag c" style="background:'+TY[s.type].c+'">'+t(s.type)+'</span><span class="tag '+LC[l]+'">'+t(l)+'</span><span class="tag">'+t(s.conf)+"</span><h2>"+e(s.name)+"</h2>"+
+  s.tags.map(function(g){return'<span class="tag">'+t(g)+"</span>"}).join("")+
+  "<dl>"+rw(t("addr"),e(s.address)+' · <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat='+s.lat+"&mlon="+s.lon+"#map=17/"+s.lat+"/"+s.lon+'">'+t("om")+"</a>")+
+  rw(t("ph"),s.phone?'<a href="tel:'+e(s.phone.replace(/\s/g,""))+'">'+e(s.phone)+"</a>":"")+rw(t("em"),s.email?'<a href="mailto:'+e(s.email)+'">'+e(s.email)+"</a>":"")+
+  rw(t("web"),w?'<a target="_blank" rel="noopener" href="'+e(w)+'">'+e(w)+"</a>":"")+rw(t("fb"),f?'<a target="_blank" rel="noopener" href="'+e(f)+'">Facebook</a>':"")+rw(t("chk"),e(s.checked))+"</dl><p>"+e(L(s.desc))+"</p>"+
+  "<strong>"+t("veh")+"</strong>"+vs+'<p><button class="b" id="sg">✉ '+t("sug")+"</button></p>"+(st.note?'<p class="note">'+e(st.note)+"</p>":"")+"</div>";
+ $("cl").onclick=function(){st.sel=null;render()};$("sg").onclick=function(){sug(s)}}
+function list(l){
+ $("list").innerHTML=l.length?"":'<div class="note">'+t("none")+"</div>";
+ l.forEach(function(s){var b=document.createElement("button");b.className="item"+(st.sel==s.id?" sel":"");
+  b.innerHTML='<span class="dot" style="background:'+TY[s.type].c+'"></span><span><strong>'+e(s.name)+"</strong><small>"+e(s.district)+" · "+s.vehicles.length+" "+t("vh").toLowerCase()+"</small></span>";
+  b.onclick=function(){pick(s.id)};$("list").appendChild(b)})}
+function page(){
+ var h="";
+ if(st.view=="stats"){var ds=uniq(S.map(function(s){return s.district}));
+  var vt=S.reduce(function(n,s){return n+s.vehicles.length},0),ver=S.filter(function(s){return s.conf=="onsite"||s.conf=="official"}).length,ne=S.filter(function(s){return lvl(s)!="fresh"}).length;
+  h='<div class="card"><h2>'+t("tot")+"</h2><p>"+t("st")+": <strong>"+S.length+"</strong> · "+t("vh")+": <strong>"+vt+"</strong> · "+t("ver")+": <strong>"+ver+"</strong> · "+t("ne")+": <strong>"+ne+"</strong></p>"+
+  '<div style="overflow-x:auto"><table><tr><th>'+t("reg")+"</th><th>"+t("st")+"</th><th>"+t("vh")+"</th></tr>"+
+  ds.map(function(d){var x=S.filter(function(s){return s.district==d});return"<tr><td>"+e(d)+"</td><td>"+x.length+"</td><td>"+x.reduce(function(n,s){return n+s.vehicles.length},0)+"</td></tr>"}).join("")+"</table></div></div>"}
+ else if(st.view=="log")h='<div class="card"><h2>'+t("log")+"</h2>"+LOG.map(function(x){return"<p><strong>"+x[0]+"</strong> — "+e(L(x[1]))+"</p>"}).join("")+"</div>";
+ else h='<div class="card"><h2>'+t("cred")+"</h2><p>"+t("mc")+"</p><ul>"+D[st.lang].cr.map(function(x){return"<li>"+e(x)+"</li>"}).join("")+"</ul></div>";
+ $("page").innerHTML=h}
+function render(){
+ document.documentElement.lang=st.lang=="pt"?"pt-PT":"en";
+ $("h1").textContent=t("h1");$("sub").textContent=t("sub");$("q").placeholder=t("q");nav();
+ var m=st.view=="map";$("app").hidden=!m;$("page").hidden=m;
+ if(!m){page();return}
+ opts($("fd"),t("d"),uniq(S.map(function(s){return s.district})),0,st.fd);
+ opts($("fv"),t("v"),["vuci","amb","patrol"],t,st.fv);opts($("fs"),t("s"),["service","reserve","retired"],t,st.fs);
+ var c="";Object.keys(TY).forEach(function(k){c+='<button class="b" aria-pressed="'+!!st.ty[k]+'" data-t="'+k+'">'+t(k)+"</button>"});
+ $("chips").innerHTML=c+'<button class="b" aria-pressed="'+!!st.up+'" data-u="1">'+t("upd")+"</button>";
+ $("chips").onclick=function(ev){var b=ev.target.closest("button");if(!b)return;if(b.dataset.u)st.up=st.up?0:1;else st.ty[b.dataset.t]=st.ty[b.dataset.t]?0:1;render()};
+ var l=S.filter(match);if(st.sel&&!l.some(function(s){return s.id==st.sel}))st.sel=null;
+ map(l);list(l);detail()}
+$("q").oninput=function(){st.q=this.value;render()};
+$("fd").onchange=function(){st.fd=this.value;render()};$("fv").onchange=function(){st.fv=this.value;render()};$("fs").onchange=function(){st.fs=this.value;render()};
+render();
+</script></body></html>
