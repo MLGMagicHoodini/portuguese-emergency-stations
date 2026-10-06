@@ -1,0 +1,8 @@
+﻿id,type,name,district,address,phone,email,website,facebook,lat,lon,tags,confidence,checked,desc_en,desc_pt
+fire-porto,fire,Sample Fire Station Porto,Porto,"Rua Exemplo 1, Porto",+351 000 000 001,,https://example.com,https://facebook.com,41.15,-8.61,volunteer;h24,onsite,2026-08-01,Sample description. Add the station's history and notes here.,Descrição de exemplo. Acrescente aqui a história e notas.
+police-lisboa,police,Sample Police Station Lisboa,Lisboa,"Avenida Exemplo 20, Lisboa",+351 000 000 002,,,,38.72,-9.14,professional,social,2025-06-10,Sample description.,Descrição de exemplo.
+amb-coimbra,ambulance,Sample Ambulance Base Coimbra,Coimbra,"Rua Exemplo 5, Coimbra",,,,,40.21,-8.43,h24,community,2024-03-02,Sample description.,Descrição de exemplo.
+fire-faro,fire,Sample Fire Station Faro,Faro,"Rua Exemplo 9, Faro",,,,,37.02,-7.93,volunteer;museum,official,2026-09-15,Sample description.,Descrição de exemplo.
+police-braga,police,Sample Police Station Braga,Braga,"Praça Exemplo 3, Braga",,,,,41.55,-8.42,,onsite,2026-01-20,Sample description.,Descrição de exemplo.
+fire-funchal,fire,Sample Fire Station Funchal,Madeira,"Rua Exemplo 7, Funchal",,,,,32.65,-16.92,professional,official,2026-05-05,Sample description.,Descrição de exemplo.
+amb-ponta-delgada,ambulance,Sample Ambulance Base Ponta Delgada,Açores,"Rua Exemplo 2, Ponta Delgada",,,,,37.74,-25.67,h24,community,2023-11-30,Sample description.,Descrição de exemplo.
