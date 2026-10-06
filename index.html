@@ -9,27 +9,29 @@
 :root[data-theme="dark"]{--bg:#161615;--card:#212120;--text:#eeeeea;--muted:#9a9a93;--line:#34342f;--land:#2b3327;--sea:#1b2530;--blue:#6aa2ff}
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-header{padding:12px 16px 0;max-width:1150px;margin:0 auto}
+header{padding:12px 16px 0}
 h1{font-size:19px;margin:0}header p{margin:2px 0 8px;color:var(--muted);font-size:13px}
 nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 button,select,input{font:inherit;color:var(--text)}
 .b{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
 .b[aria-pressed=true]{background:var(--text);color:var(--bg);border-color:var(--text)}
 .sp{flex:1}
-.app,#page{display:grid;grid-template-columns:minmax(300px,390px) 1fr;gap:14px;padding:12px 16px 20px;max-width:1150px;margin:0 auto}
-#page{display:block}
+.app{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:14px;padding:12px 16px 20px}
+#page{display:block;padding:12px 16px 20px;max-width:1000px;margin:0 auto}
 .side{display:flex;flex-direction:column;gap:10px;min-width:0}
 input[type=search],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .row{display:flex;gap:6px;flex-wrap:wrap}.row select{flex:1;min-width:120px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-.list{display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow:auto}
+.list{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 290px);min-height:160px;overflow:auto}
 .item{display:flex;gap:10px;align-items:center;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 11px;cursor:pointer}
 .item.sel,.item:hover{border-color:var(--text)}.item small{display:block;color:var(--muted)}
 .dot{width:12px;height:12px;border-radius:50%;flex:none}
-.mapwrap{background:var(--sea);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:sticky;top:8px;height:calc(100vh - 120px);min-height:420px}
+.mapwrap{background:var(--sea);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:sticky;top:8px;height:calc(100vh - 110px);min-height:420px}
 #map{width:100%;height:100%;background:var(--sea)}
 .pin{width:26px;height:26px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 12px/22px system-ui,sans-serif;text-align:center;box-shadow:0 1px 4px #0006}
 .pin.sel{box-shadow:0 0 0 3px #fff,0 0 0 6px #111}
+#detail:not(:empty){position:absolute;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.35)}
+#detail .card{width:min(580px,100%);max-height:100%;overflow:auto;box-shadow:0 8px 30px #0006}
 .jump{position:absolute;z-index:1000;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:70%}
 .tag{display:inline-block;font-size:12px;border-radius:999px;padding:2px 9px;margin:0 4px 4px 0;border:1px solid var(--line)}
 .tag.c{color:#fff;border:0}.ok{background:#2e9e6b;color:#fff;border:0}.am{background:#d99a1e;color:#fff;border:0}.rd{background:#d94a38;color:#fff;border:0}
@@ -38,14 +40,14 @@ dl{margin:8px 0;display:grid;grid-template-columns:auto 1fr;gap:3px 12px}dt{colo
 a{color:var(--blue)}.v{border-top:1px solid var(--line);padding:8px 0;font-size:14px}.v small,.note{color:var(--muted);font-size:12px}
 .v img{max-width:100%;border-radius:8px;margin:4px 0}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px;border-bottom:1px solid var(--line)}
-@media (max-width:760px){.app{grid-template-columns:1fr}.mapwrap{position:static;height:55vh;min-height:300px;order:-1}.list{max-height:none}}
+@media (max-width:760px){#detail:not(:empty){position:fixed;z-index:3000}#detail .card{max-height:90vh}.app{grid-template-columns:1fr}.mapwrap{position:static;height:55vh;min-height:300px;order:-1}.list{max-height:none}}
 </style></head><body>
 <header><h1 id="h1"></h1><p id="sub"></p><nav id="nav"></nav></header>
 <div class="app" id="app"><div class="side">
 <input type="search" id="q">
 <div class="row"><select id="fd"></select><select id="fv"></select><select id="fs"></select></div>
-<div class="row" id="chips"></div><div id="detail"></div><div class="list" id="list"></div></div>
-<div class="mapwrap"><div id="map"></div><div class="jump" id="jump"></div></div></div>
+<div class="row" id="chips"></div><div class="list" id="list"></div></div>
+<div class="mapwrap"><div id="map"></div><div class="jump" id="jump"></div><div id="detail"></div></div></div>
 <div id="page" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
@@ -110,9 +112,12 @@ function near(){
   st.sel=best.id;render();st.note=t("dist")+": ~"+(Math.sqrt(bd)*111).toFixed(1)+" km";detail();
   MAP.fitBounds([[la,lo],[best.lat,best.lon]],{padding:[60,60],maxZoom:14})
  },function(){st.note=t("nonear");render()},{timeout:10000})}
-function pick(id){var s=S.filter(function(x){return x.id==id})[0];st.sel=id;st.note="";render();if(MAP&&s)MAP.flyTo([s.lat,s.lon],Math.max(MAP.getZoom(),11),{duration:.6});$("detail").scrollIntoView({behavior:"smooth",block:"nearest"})}
+function pick(id){var s=S.filter(function(x){return x.id==id})[0];st.sel=id;st.note="";render();if(MAP&&s)MAP.flyTo([s.lat,s.lon],Math.max(MAP.getZoom(),11),{duration:.6})}
 function rw(a,b){return b?"<dt>"+a+"</dt><dd>"+b+"</dd>":""}
+function closeD(){st.sel=null;st.note="";render()}
+document.addEventListener("keydown",function(ev){if(ev.key=="Escape"&&(st.sel||st.note))closeD()});
 function detail(){
+ $("detail").onclick=function(ev){if(ev.target===this)closeD()};
  var s=S.filter(function(x){return x.id==st.sel})[0];
  if(!s){$("detail").innerHTML=st.note?'<div class="card note">'+e(st.note)+"</div>":"";return}
  var w=url(s.website),f=url(s.facebook),l=lvl(s);
@@ -125,7 +130,7 @@ function detail(){
   rw(t("ph"),s.phone?'<a href="tel:'+e(s.phone.replace(/\s/g,""))+'">'+e(s.phone)+"</a>":"")+rw(t("em"),s.email?'<a href="mailto:'+e(s.email)+'">'+e(s.email)+"</a>":"")+
   rw(t("web"),w?'<a target="_blank" rel="noopener" href="'+e(w)+'">'+e(w)+"</a>":"")+rw(t("fb"),f?'<a target="_blank" rel="noopener" href="'+e(f)+'">Facebook</a>':"")+rw(t("chk"),e(s.checked))+"</dl><p>"+e(loc(s.desc))+"</p>"+
   "<strong>"+t("veh")+"</strong>"+vs+'<p><button class="b" id="sg">✉ '+t("sug")+"</button></p>"+(st.note?'<p class="note">'+e(st.note)+"</p>":"")+"</div>";
- $("cl").onclick=function(){st.sel=null;render()};$("sg").onclick=function(){sug(s)}}
+ $("cl").onclick=function(){st.sel=null;st.note="";render()};$("sg").onclick=function(){sug(s)}}
 function list(l){
  $("list").innerHTML=l.length?"":'<div class="note">'+t("none")+"</div>";
  l.forEach(function(s){var b=document.createElement("button");b.className="item"+(st.sel==s.id?" sel":"");
