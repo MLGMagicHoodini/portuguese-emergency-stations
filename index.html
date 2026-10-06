@@ -126,6 +126,9 @@ function near(){
  },function(){st.note=t("nonear");render()},{timeout:10000})}
 function pick(id){var s=S.filter(function(x){return x.id==id})[0];st.sel=id;st.note="";render();if(MAP&&s)MAP.flyTo([s.lat,s.lon],Math.max(MAP.getZoom(),11),{duration:.6})}
 function rw(a,b){return b?"<dt>"+a+"</dt><dd>"+b+"</dd>":""}
+function ph(p){return(p||"").split(/[;\/]/).map(function(x){x=x.trim();if(!x)return"";var d=x.replace(/[^\d+]/g,""),m=d.match(/^(?:\+?351)?(\d{9})$/),show=x,tel=d;
+ if(m){tel="+351"+m[1];show=(/^\+?351/.test(d)?"+351 ":"")+m[1].replace(/(\d{3})(\d{3})(\d{3})/,"$1 $2 $3")}
+ return'<a href="tel:'+e(tel)+'">'+e(show)+"</a>"}).filter(Boolean).join(" · ")}
 function closeD(){st.sel=null;st.note="";render()}
 document.addEventListener("keydown",function(ev){if(ev.key=="Escape"&&(st.sel||st.note))closeD()});
 function detail(){
@@ -139,7 +142,7 @@ function detail(){
  $("detail").innerHTML='<div class="card"><button class="x" aria-label="Close" id="cl">×</button><span class="tag c" style="background:'+TY[s.type].c+'">'+t(s.type)+'</span><span class="tag '+LC[l]+'">'+t(l)+'</span><span class="tag">'+t(s.conf)+"</span><h2>"+e(s.name)+"</h2>"+
   s.tags.map(function(g){return'<span class="tag">'+t(g)+"</span>"}).join("")+
   "<dl>"+rw(t("addr"),e(s.address)+' · <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat='+s.lat+"&mlon="+s.lon+"#map=17/"+s.lat+"/"+s.lon+'">'+t("om")+"</a>")+
-  rw(t("ph"),s.phone?'<a href="tel:'+e(s.phone.replace(/\s/g,""))+'">'+e(s.phone)+"</a>":"")+rw(t("em"),s.email?'<a href="mailto:'+e(s.email)+'">'+e(s.email)+"</a>":"")+
+  rw(t("ph"),ph(s.phone))+rw(t("em"),s.email?'<a href="mailto:'+e(s.email)+'">'+e(s.email)+"</a>":"")+
   rw(t("web"),w?'<a target="_blank" rel="noopener" href="'+e(w)+'">'+e(w)+"</a>":"")+rw(t("fb"),f?'<a target="_blank" rel="noopener" href="'+e(f)+'">Facebook</a>':"")+rw(t("chk"),e(s.checked))+"</dl><p>"+e(loc(s.desc))+"</p>"+
   "<strong>"+t("veh")+"</strong>"+vs+'<p><button class="b" id="sg">✉ '+t("sug")+"</button></p>"+(st.note?'<p class="note">'+e(st.note)+"</p>":"")+"</div>";
  $("cl").onclick=function(){st.sel=null;st.note="";render()};$("sg").onclick=function(){sug(s)}}
