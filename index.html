@@ -67,7 +67,7 @@ var st={lang:/^pt/i.test(navigator.language)?"pt":"en",view:"map",q:"",ty:{fire:
 var $=function(i){return document.getElementById(i)};
 function t(k){return D[st.lang][k]||k}
 function e(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-function L(o){return o?(o[st.lang]||o.en):""}
+function loc(o){return o?(o[st.lang]||o.en):""}
 function url(u){return/^https?:\/\//i.test(u)?u:""}
 function lvl(s){var m=(Date.now()-new Date(s.checked))/2.63e9;return m>24?"old":m>12?"age":"fresh"}
 var LC={fresh:"ok",age:"am",old:"rd"};
@@ -77,7 +77,7 @@ function match(s){
  if(st.fs&&!s.vehicles.some(function(v){return v.status==st.fs}))return 0;
  if(st.up&&lvl(s)=="fresh")return 0;
  var q=st.q.trim().toLowerCase();if(!q)return 1;
- var h=[s.name,s.district,s.address,L(s.desc)];s.vehicles.forEach(function(v){h.push(v.id,v.plate,v.model)});
+ var h=[s.name,s.district,s.address,loc(s.desc)];s.vehicles.forEach(function(v){h.push(v.id,v.plate,v.model)});
  return h.join(" ").toLowerCase().indexOf(q)>-1}
 function opts(el,first,vals,lab,cur){el.innerHTML='<option value="">'+e(first)+'</option>'+vals.map(function(v){return'<option value="'+e(v)+'"'+(v==cur?" selected":"")+'>'+e(lab?lab(v):v)+'</option>'}).join("")}
 function uniq(a){return a.filter(function(x,i){return a.indexOf(x)==i})}
@@ -118,12 +118,12 @@ function detail(){
  var w=url(s.website),f=url(s.facebook),l=lvl(s);
  var vs=s.vehicles.length?s.vehicles.map(function(v){return'<div class="v"><strong>'+e(v.id)+"</strong> · "+t(v.type)+' <span class="tag">'+t(v.status)+"</span><br><small>"+e(v.model)+" · "+t("plate")+" "+e(v.plate)+" · "+e(v.year)+"</small>"+
   (v.photo?(v.photo.url?'<br><img src="'+e(url(v.photo.url))+'" alt="" onerror="this.remove()">':"")+"<br><small>"+t("photo")+": "+e(v.photo.credit)+" ("+e(v.photo.license)+")</small>":"")+
-  (v.hist&&v.hist.length?"<br><small>"+t("hist")+": "+v.hist.map(function(x){return e(x.y)+" "+e(L(x.t))}).join(" → ")+"</small>":"")+"</div>"}).join(""):'<p class="note">'+t("nov")+"</p>";
+  (v.hist&&v.hist.length?"<br><small>"+t("hist")+": "+v.hist.map(function(x){return e(x.y)+" "+e(loc(x.t))}).join(" → ")+"</small>":"")+"</div>"}).join(""):'<p class="note">'+t("nov")+"</p>";
  $("detail").innerHTML='<div class="card"><button class="x" aria-label="Close" id="cl">×</button><span class="tag c" style="background:'+TY[s.type].c+'">'+t(s.type)+'</span><span class="tag '+LC[l]+'">'+t(l)+'</span><span class="tag">'+t(s.conf)+"</span><h2>"+e(s.name)+"</h2>"+
   s.tags.map(function(g){return'<span class="tag">'+t(g)+"</span>"}).join("")+
   "<dl>"+rw(t("addr"),e(s.address)+' · <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat='+s.lat+"&mlon="+s.lon+"#map=17/"+s.lat+"/"+s.lon+'">'+t("om")+"</a>")+
   rw(t("ph"),s.phone?'<a href="tel:'+e(s.phone.replace(/\s/g,""))+'">'+e(s.phone)+"</a>":"")+rw(t("em"),s.email?'<a href="mailto:'+e(s.email)+'">'+e(s.email)+"</a>":"")+
-  rw(t("web"),w?'<a target="_blank" rel="noopener" href="'+e(w)+'">'+e(w)+"</a>":"")+rw(t("fb"),f?'<a target="_blank" rel="noopener" href="'+e(f)+'">Facebook</a>':"")+rw(t("chk"),e(s.checked))+"</dl><p>"+e(L(s.desc))+"</p>"+
+  rw(t("web"),w?'<a target="_blank" rel="noopener" href="'+e(w)+'">'+e(w)+"</a>":"")+rw(t("fb"),f?'<a target="_blank" rel="noopener" href="'+e(f)+'">Facebook</a>':"")+rw(t("chk"),e(s.checked))+"</dl><p>"+e(loc(s.desc))+"</p>"+
   "<strong>"+t("veh")+"</strong>"+vs+'<p><button class="b" id="sg">✉ '+t("sug")+"</button></p>"+(st.note?'<p class="note">'+e(st.note)+"</p>":"")+"</div>";
  $("cl").onclick=function(){st.sel=null;render()};$("sg").onclick=function(){sug(s)}}
 function list(l){
@@ -138,7 +138,7 @@ function page(){
   h='<div class="card"><h2>'+t("tot")+"</h2><p>"+t("st")+": <strong>"+S.length+"</strong> · "+t("vh")+": <strong>"+vt+"</strong> · "+t("ver")+": <strong>"+ver+"</strong> · "+t("ne")+": <strong>"+ne+"</strong></p>"+
   '<div style="overflow-x:auto"><table><tr><th>'+t("reg")+"</th><th>"+t("st")+"</th><th>"+t("vh")+"</th></tr>"+
   ds.map(function(d){var x=S.filter(function(s){return s.district==d});return"<tr><td>"+e(d)+"</td><td>"+x.length+"</td><td>"+x.reduce(function(n,s){return n+s.vehicles.length},0)+"</td></tr>"}).join("")+"</table></div></div>"}
- else if(st.view=="log")h='<div class="card"><h2>'+t("log")+"</h2>"+LOG.map(function(x){return"<p><strong>"+x[0]+"</strong> — "+e(L(x[1]))+"</p>"}).join("")+"</div>";
+ else if(st.view=="log")h='<div class="card"><h2>'+t("log")+"</h2>"+LOG.map(function(x){return"<p><strong>"+x[0]+"</strong> — "+e(loc(x[1]))+"</p>"}).join("")+"</div>";
  else h='<div class="card"><h2>'+t("cred")+"</h2><p>"+t("mc")+"</p><ul>"+D[st.lang].cr.map(function(x){return"<li>"+e(x)+"</li>"}).join("")+"</ul></div>";
  $("page").innerHTML=h}
 function render(){
