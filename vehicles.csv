@@ -1,4 +1,7 @@
-﻿station_id,id,type,model,plate,year,status,photo_url,photo_credit,photo_license,history_en,history_pt
-fire-porto,VUCI-01,vuci,Sample model,00-AA-00,2015,service,,Sample Author,CC BY 4.0,2015=Delivered new to the station; 2021=Major refurbishment,2015=Entregue novo ao quartel; 2021=Grande remodelação
-fire-porto,VSAT-02,amb,Sample model,00-BB-00,2019,service,,,,,
-police-lisboa,PT-101,patrol,Sample model,00-CC-00,2020,service,,,,,
+station_id,id,type,model,plate,year,status,photo_url,photo_credit,photo_license,history_en,history_pt
+bv-porto,2202 VUCI 04,vuci,,,,service,,,,,
+bv-porto,2202 VCOT 01,vcot,,,,service,,,,,
+bv-porto,2202 VFCI 05,vfci,Mercedes UNIMOG 1350L,,,service,,,,,
+bv-porto,2202 VCOT 02,vcot,,,,,,,,,
+bv-porto,2202 ABSC 06,absc,,,,,,,,,
+bv-porto,2202 VECI 03,veci,,,,,,,,,
