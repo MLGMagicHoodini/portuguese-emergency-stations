@@ -1,3 +1,10 @@
 id,type,name,district,address,phone,email,website,facebook,lat,lon,tags,confidence,checked,desc_en,desc_pt
-bv-porto,fire,Bombeiros Voluntários do Porto,Porto,"R. de Rodrigues Sampaio 145, 4000-065 Porto",222055845,,,https://www.facebook.com/p/Bombeiros-Volunt%C3%A1rios-do-Porto-1875-100085054153480/,41.14861709,-8.609886561,"volunteer, h24",onsite,2026-10-06,,
-psp-porto,police,PSP - Comando Metropolitano do Porto,Porto,"Largo Primeiro de Dezembro, 4000-404 Porto",222092000,,https://www.psp.pt/,,41.14282494,-8.609394594,h24,onsite,2026-10-06,,
+bv-porto,fire,Bombeiros Voluntários do Porto,Porto,"R. de Rodrigues Sampaio 145, 4000-065 Porto",222055845,,,https://www.facebook.com/p/Bombeiros-Volunt%C3%A1rios-do-Porto-1875-100085054153480/,41.14861709,-8.609886561,"h24, volunteer",,2026-10-06,,
+psp-porto,police,PSP - Comando Metropolitano do Porto,Porto,"Largo Primeiro de Dezembro, 4000-404 Porto",222092000,,https://www.psp.pt/,,41.14282494,-8.609394594,"h24, psp",,2026-10-06,,
+psp-infante,police,PSP - 9ª Esquadra (Infante),Porto,"PC do Infante Henrique, 4050-116 Porto",222461220,,https://www.psp.pt/,,41.14169945,-8.614704921,"h24, psp",,2026-10-07,,
+psp-bonfim,police,PSP - 3ª Esquadra,Porto,"Rua do Heroísmo nº 218, 4300-255 Porto",225898930,,https://www.psp.pt/,,41.14663689,-8.592675892,"psp, h24",,2026-10-07,,
+psp-cedofeita,police,PSP - 12ª Esquadra (Cedofeita),Porto,"Praça de Pedro Nunes 16, 4050-466 Porto",222461230,,https://www.psp.pt/,,41.15603989,-8.622727506,"h24, psp",,2026-10-07,,
+psp-2esq,police,PSP - 2ª Divisão Policial do Porto,Porto,"Rua de Júlio Dinis 63, 4050-323 Porto",222461000,,https://www.psp.pt/,,41.14938778,-8.625779018,psp,,2026-10-07,,
+psp-7esq,police,PSP - 7ª Esquadra de Investigação Criminal/Trânsito do Porto,Porto,"R. de António Carneiro 8, 4300-253 Porto",225191133,,https://www.psp.pt/,,41.14673795,-8.592751488,psp,,2026-10-07,,
+gnr-comando,police,GNR - Comando Territorial do Porto,Porto,"R. do Carmo, 4099-041 Porto",223399600,,https://www.gnr.pt/,,41.14739071,-8.617181214,gnr,,2026-10-07,,
+psp-corujeira,police,PSP - 3ª Divisão Policial do Porto (Corujeira),Porto,"R. Dr. Maurício Estêves Pereira Pinto 53, 4300-006 Porto",222461350,,https://www.psp.pt/,,41.15565828,-8.579820819,psp,,2026-10-07,,
